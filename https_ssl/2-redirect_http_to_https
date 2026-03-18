@@ -1,0 +1,28 @@
+global
+    log /dev/log local0
+    log /dev/log local1 notice
+    daemon
+
+defaults
+    log global
+    mode http
+    option httplog
+    option dontlognull
+    timeout connect 5000
+    timeout client 50000
+    timeout server 50000
+
+frontend http_front
+    bind *:80
+    redirect scheme https code 301 if !{ ssl_fc }
+
+frontend https_front
+    bind *:443 ssl crt /etc/letsencrypt/live/www.kaldrick.tech/haproxy.pem
+    reqadd X-Forwarded-Proto:\ https
+    default_backend web_backend
+
+backend web_backend
+    balance roundrobin
+    option httpchk GET /
+    server web-01 34.227.161.98:80 check
+    server web-02 44.205.250.3:80 check
