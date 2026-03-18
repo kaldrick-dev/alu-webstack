@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# shellcheck disable=SC2086
+
+DOMAIN=$1
+SUBDOMAIN=$2
+
+get_record_info() {
+  local sub="$1"
+  local result
+
+  result=$(dig +short "$sub.$DOMAIN" | awk 'NR==1 {print $1}')
+  echo "The subdomain $sub is a A record and points to $result"
+}
+
+if [ -n "$SUBDOMAIN" ]; then
+  get_record_info "$SUBDOMAIN"
+else
+  get_record_info "www"
+  get_record_info "lb-01"
+  get_record_info "web-01"
+  get_record_info "web-02"
+fi
